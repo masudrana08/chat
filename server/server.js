@@ -19,14 +19,25 @@ io.on('connection', (socket) => {
     if (error){
         callback(error)
     }
-
+    socket.join(room)
+    socket.emit('message', {user: user, text:`welcome ${name} to ${room}`})
+    socket.broadcast.to(room).emit('message', {user: user, text:`${name} joined to the ${room}`})
     socket.on('disconnect', ()=>{
-        const users= removeUser(socket.id)
-        callback(users)
+      socket.broadcast.to(room).emit('message', {user: user, text:`Disconnected ${name} from ${room}`})
+      const users= removeUser(socket.id)
+      callback()
     })
+    socket.on('message', (msg)=>{
+      console.log(msg)
+      socket.emit('message', {user: name, text:msg})
+      socket.broadcast.to(room).emit('message', {user: name, text:msg})
+      
+    })
+    
   })
   
-  
+
+    
 });
 
 httpServer.listen(4000, () => {
